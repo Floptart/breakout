@@ -2,8 +2,9 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Gamedev Canvas Workshop</title>
+    <title>Simple Breakout Game</title>
     <style>
+        /* CSS for canvas */
         * { padding: 0; margin: 0;}
         canvas { background: #eee; display: block; margin: 0 auto; }
     </style>
@@ -14,21 +15,35 @@
 <canvas id="myCanvas" width="480" height="320"></canvas>
 
 <script>
+    
+    // Setting up canvas elements
     var canvas = document.getElementById("myCanvas");
     var ctx = canvas.getContext("2d");
     var x = canvas.width/2;
     var y = canvas.height - 30;
+
+    // Setting angle for ball movement.
     var dx = 2;
     var dy = -2;
+    
+    // Settings for ball
     var ballRadius = 10;
+    
+    // Setting default colors for game objects
     var ballColor = "#0095DD";
     var paddleColor = "#0095DD";
     var brickColor = "#0095DD";
+    
+    // Settings for paddle
     var paddleHeight = 10;
     var paddleWidth = 75;
     var paddleX = (canvas.width - paddleWidth) / 2;
+    
+    // Variables for button hanlders
     var leftPressed = false;
     var rightPressed = false;
+    
+    // Settings for bricks
     var brickRowCount = 3;
     var brickColumnCount = 5;
     var brickWidth = 75;
@@ -36,9 +51,14 @@
     var brickPadding = 10;
     var brickOffsetTop = 30;
     var brickOffsetLeft = 30;
+    
+    // Setting default score
     var score = 0;
+    
+    // Setting default lives
     var lives = 3;
 
+    // Creating array of bricks and setting status to 1 for termination when hit
     var bricks = [];
     for(c=0; c<brickColumnCount; c++) {
         bricks[c] = [];
@@ -47,6 +67,7 @@
         }
     }
     
+    // Handler for detecting when left and right arrow keys are pressed
     function keyDownHandler(e) {
         if(e.keyCode == 39) {
             rightPressed = true;
@@ -55,7 +76,8 @@
             leftPressed = true;
         }
     }
-
+    
+    // Handler for detecting when left and right arrows are no longer pressed. 
     function keyUpHandler(e) {
         if(e.keyCode == 39) {
             rightPressed = false;
@@ -65,6 +87,7 @@
         }
     }
     
+    // Handler for using mouse to controll paddle
     function mouseMoveHandler(e) {
         var relativeX = e.clientX - canvas.offsetLeft;
         if(relativeX > 0 && relativeX < canvas.width) {
@@ -72,16 +95,23 @@
         }
     }
     
+    // Function to detect when a brick has been hit by ball
     function collisionDetection() {
         for(c=0; c<brickColumnCount; c++) {
             for(r=0; r<brickRowCount; r++) {
                 var b = bricks[c][r];
                 if(b.status == 1) {
+                    //If statement detecting if brick was hit
                     if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
+                        // Reverses direction
                         dy = -dy;
+                        // Sets status to 0 to remove brick
                         b.status = 0;
+                        // Changes ball color to random Hex value
                         ballColor = "#" + ((1 << 24) * Math.random() | 0).toString(16);
+                        // Adds to score
                         score++;
+                        // Completes game when score is equal to total bricks
                         if(score == brickRowCount * brickColumnCount) {
                             alert("YOU WIN, NICE JOB!" + " Score: " + score);
                             document.location.reload();
@@ -92,18 +122,21 @@
         }
     }
     
+    // Function to draw the score to canvas
     function drawScore() {
         ctx.font = "16px Ariel";
         ctx.fillStyle = "#0095DD";
         ctx.fillText("Score: " + score, 8, 20);
     }
     
+    // Function to draw lives to canvas
     function drawLives() {
         ctx.font = "16pt Ariel";
         ctx.fillStyle = "#0095DD";
         ctx.fillText("Lives: " + lives, canvas.width - 75, 20);
     }
     
+    // Function to draw ball on canvas
     function drawBall() {
         ctx.beginPath();
         ctx.arc(x, y, ballRadius, 0, Math.PI*2);
@@ -112,6 +145,7 @@
         ctx.closePath();
     }
     
+    // Function to draw paddle on canvas
     function drawPaddle() {
         ctx.beginPath();
         ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
@@ -120,6 +154,7 @@
         ctx.closePath();
     }
     
+    // Function to draw bricks to canvas
     function drawBricks() {
         for(c=0; c<brickColumnCount; c++) {
             for(r=0; r<brickRowCount; r++) {
@@ -138,21 +173,27 @@
         }
     }
     
+    // Function to start game
     function draw() {
+        // Clears canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Calls drawing functions
         drawBricks();
         drawBall();
         drawPaddle();
         drawScore();
         drawLives();
+        // Calls collision detection logic
         collisionDetection();
         x += dx;
         y += dy;
         
+        // Log for top and bottom walls + paddle area
         if(y + dy < ballRadius) {
         dy = -dy;
         ballColor = "#" + ((1 << 24) * Math.random() | 0).toString(16);
         } else if(y + dy > canvas.height - ballRadius) {
+            // If the ball is within range of paddle, it will bounce off bottom
             if(x > paddleX && x < paddleX + paddleWidth) {
                 dy = -dy;
                 ballColor = "#" + ((1 << 24) * Math.random() | 0).toString(16);
@@ -171,6 +212,7 @@
             }
         }
         
+        // Logic for left and right walls
         if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
         dx = -dx;
         ballColor = "#" + ((1 << 24) * Math.random() | 0).toString(16);
@@ -185,11 +227,12 @@
         requestAnimationFrame(draw);
     }
     
+    // Listeners for keypresses and mouse movement
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
     document.addEventListener("mousemove", mouseMoveHandler, false);
 
-    //setInterval(draw, 10);
+    // Starts program
     draw();
     
 
